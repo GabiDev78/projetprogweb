@@ -1,3 +1,5 @@
+ATTENTION : NE PAS AVOIR DE SERVICES TOURNANT DEJA SUR LES PORTS 3000 ET 8080 !
+
 ## Prérequis
 
 - **Node.js / npm** – Pour développer et tester les services Node.js.

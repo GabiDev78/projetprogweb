@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: history-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: history
+  template:
+    metadata:
+      labels:
+        app: history
+    spec:
+      containers:
+      - name: history
+        image: gabidev94/history-service:latest 
+        env:
+        - name: MONGO_URL
+          value: "mongodb://mongo-service:27017"
+        ports:
+        - containerPort: 4000

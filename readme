@@ -1,0 +1,46 @@
+## Prérequis
+
+- **Node.js / npm** – Pour développer et tester les services Node.js.
+- **Docker & Docker Compose** – Pour construire et lancer les conteneurs.
+- **MongoDB** – La base de données utilisée par le History Service (les images officielles seront utilisées en local et sur Kubernetes).
+- **Kubernetes / Minikube** – Pour déployer les microservices dans un cluster local.
+- **kubectl** – Pour interagir avec le cluster Kubernetes.
+- **Istioctl** – Pour installer et configurer Istio (Service Mesh).
+
+
+Pseudo Kubernetes : gabidev94
+
+Commandes : 
+
+Dans la racine du projet : 
+
+npm install
+
+docker-compose up --build
+
+Minikube start 
+
+Dans le répertoire Kubernetes : 
+
+kubectl apply -f mongo-deployment.yaml
+kubectl apply -f mongo-service.yaml
+kubectl apply -f history-deployment.yaml
+kubectl apply -f history-service.yaml
+kubectl apply -f scanner-deployment.yaml
+kubectl apply -f scanner-service.yaml
+
+Dans la racine du projet : 
+
+kubectl port-forward deployment/scanner-deployment 3000:3000
+
+kubectl port-forward service/istio-ingressgateway -n istio-system 8080:80
+
+
+istioctl install --set profile=demo -y
+kubectl apply -f gateway.yaml
+kubectl apply -f virtualservice.yaml
+
+
+kubectl apply -f mtls.yaml
+
+

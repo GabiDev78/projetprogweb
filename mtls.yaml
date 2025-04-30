@@ -1,0 +1,10 @@
+# pour utilisation de mTLS pour la communication entre les services
+
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: default
+spec:
+  mtls:
+    mode: STRICT

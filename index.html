@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Scanner de ports (Projet Progweb)</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input, button { padding: 5px; margin: 5px; }
+    table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 8px; }
+    th { background-color: #f2f2f2; }
+    .scan-section, .history-section { margin-bottom: 40px; }
+  </style>
+</head>
+<body>
+  <div class="scan-section">
+    <h1>Scanner de ports ouverts (projet progweb)</h1>
+    <form id="scanForm">
+      <label for="host">Host :</label>
+      <input type="text" id="host" name="host" placeholder="ex : 192.168.1.1" required><br>
+      <label for="start">Port de début :</label>
+      <input type="number" id="start" name="start" value="1"><br>
+      <label for="end">Port de fin :</label>
+      <input type="number" id="end" name="end" value="1024"><br>
+      <label for="fast">Mode rapide :</label>
+      <input type="checkbox" id="fast" name="fast" value="true"><br>
+      <button type="submit">Lancer le scan</button>
+    </form>
+  
+    <h2>Résultats du scan</h2>
+    <div id="results">
+      <!-- on affiche resultat scans -->
+    </div>
+  </div>
+  
+  <div class="history-section">
+    <h2>Historique des scans (ports ouverts)</h2>
+    <button id="historyButton">Afficher l'historique</button>
+    <div id="historyResults">
+      <!-- on affiche historique -->
+    </div>
+  </div>
+  
+  <script>
+        // gateway istio (attention cest sur le locahost, a configurer comme vous voulez)
+    const gatewayBaseUrl = 'http://localhost:8080';
+
+    document.getElementById('scanForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const host = document.getElementById('host').value;
+      const start = document.getElementById('start').value;
+      const end = document.getElementById('end').value;
+      const fast = document.getElementById('fast').checked ? 'true' : 'false';
+
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<p>Scan en cours...</p>';
+
+      try {
+        const response = await fetch(`${gatewayBaseUrl}/scan?host=${encodeURIComponent(host)}&start=${start}&end=${end}&fast=${fast}`);
+        if (!response.ok) {
+          resultsDiv.innerHTML = '<p>Erreur lors du scan !</p>';
+          return;
+        }
+        const data = await response.json();
+
+        let html = '<table>';
+        html += '<tr><th>Port</th><th>Statut</th><th>Banniere</th></tr>';
+        data.results.filter(result => result.status === 'open').forEach(result => {
+          html += `<tr>
+            <td>${result.port}</td>
+            <td>${result.status}</td>
+            <td>${result.banner || ''}</td>
+          </tr>`;
+        });
+        html += '</table>';
+        resultsDiv.innerHTML = html;
+      } catch (err) {
+        resultsDiv.innerHTML = `<p>Erreur : ${err.message}</p>`;
+      }
+    });
+
+    // Et pour l'historique on fait un bouton qui afiche l historique
+    document.getElementById('historyButton').addEventListener('click', async function() {
+      const historyDiv = document.getElementById('historyResults');
+      historyDiv.innerHTML = '<p>Chargement de l historique...</p>';
+      try {
+        const response = await fetch(`${gatewayBaseUrl}/history`);
+        if (!response.ok) {
+          historyDiv.innerHTML = '<p>Erreur récup historique.</p>';
+          return;
+        }
+        const data = await response.json();
+
+        let html = '';
+        data.forEach(scan => {
+          html += `<h3>Scan de ${scan.host} le ${new Date(scan.date).toLocaleString()}</h3>`;
+          if (scan.results.length > 0) {
+            html += '<ul>';
+            scan.results.forEach(result => {
+              html += `<li>Port ${result.port} : ${result.status}${result.banner ? ' - ' + result.banner : ''}</li>`;
+            });
+            html += '</ul>';
+          } else {
+            html += '<p>Aucun port ouvert !</p>';
+          }
+        });
+        historyDiv.innerHTML = html;
+      } catch (err) {
+        historyDiv.innerHTML = `<p>Erreur : ${err.message}</p>`;
+      }
+    });
+
+  </script>
+</body>
+</html>

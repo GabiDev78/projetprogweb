@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: scanner-service
+spec:
+  selector:
+    app: scanner
+  ports:
+  - protocol: TCP
+    port: 3000        # Port accessible dans le cluster
+    targetPort: 3000  # Port sur lequel l’application écoute dans le conteneur
+  type: ClusterIP     # Par défaut, le service n’est pas exposé en externe

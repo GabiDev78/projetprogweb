@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scanner-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scanner
+  template:
+    metadata:
+      labels:
+        app: scanner
+    spec:
+      containers:
+      - name: scanner
+        image: gabidev94/scanner-service:latest
+        env:
+        - name: HISTORY_URL
+          value: "http://history-service:4000/history"
+        ports:
+        - containerPort: 3000
